@@ -1,0 +1,43 @@
+services:
+  app:
+    image: php:local-8.2-fpm 
+    container_name: app.${PROJECT}
+    working_dir: /app
+    user: vscode
+    command: composer install && php artisan serve --host 0.0.0.0 --port 80
+    volumes:
+      - ./ess:/app
+      - dotfiles:/home/vscode
+  
+  db:
+    image: postgis/postgis
+    container_name: db.${PROJECT}
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      # - ./postgres_init:/docker-entrypoint-initdb.d
+      - ./postgres_data:/var/lib/postgresql/data
+  
+  pgadmin:
+    image: pgadmin:local
+    container_name: pgadmin.${PROJECT}
+    user: root
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    volumes:
+      - ./pgadmin_data:/var/lib/pgadmin  
+  
+  node:
+    image: node:local
+    container_name: node.${PROJECT}
+    working_dir: /app
+    user: vscode
+    command: sh -c 'npm install && npm run watch'
+    volumes:
+      - ./ess:/app
+      - dotfiles:/home/vscode
+volumes:
+  dotfiles:
